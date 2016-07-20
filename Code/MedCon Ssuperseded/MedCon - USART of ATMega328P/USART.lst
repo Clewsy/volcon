@@ -1,0 +1,192 @@
+   1               		.file	"USART.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+  15               	.Ltext0:
+  16               	.global	initUSART
+  18               	initUSART:
+  19               	.LFB2:
+  20               	.LM1:
+  21               	/* prologue: function */
+  22               	/* frame size = 0 */
+  23               	.LM2:
+  24 0000 1092 C500 		sts 197,__zero_reg__
+  25               	.LM3:
+  26 0004 87E6      		ldi r24,lo8(103)
+  27 0006 8093 C400 		sts 196,r24
+  28               	.LM4:
+  29 000a E0EC      		ldi r30,lo8(192)
+  30 000c F0E0      		ldi r31,hi8(192)
+  31 000e 8081      		ld r24,Z
+  32 0010 8D7F      		andi r24,lo8(-3)
+  33 0012 8083      		st Z,r24
+  34               	.LM5:
+  35 0014 88E9      		ldi r24,lo8(-104)
+  36 0016 8093 C100 		sts 193,r24
+  37               	.LM6:
+  38 001a 86E0      		ldi r24,lo8(6)
+  39 001c 8093 C200 		sts 194,r24
+  40               	/* epilogue start */
+  41               	.LM7:
+  42 0020 0895      		ret
+  43               	.LFE2:
+  45               	.global	receiveByte
+  47               	receiveByte:
+  48               	.LFB3:
+  49               	.LM8:
+  50               	/* prologue: function */
+  51               	/* frame size = 0 */
+  52               	.L4:
+  53               	.LM9:
+  54 0022 8091 C000 		lds r24,192
+  55 0026 87FF      		sbrs r24,7
+  56 0028 00C0      		rjmp .L4
+  57               	.LM10:
+  58 002a 8091 C600 		lds r24,198
+  59               	/* epilogue start */
+  60               	.LM11:
+  61 002e 0895      		ret
+  62               	.LFE3:
+  64               	.global	transmitByte
+  66               	transmitByte:
+  67               	.LFB4:
+  68               	.LM12:
+  69               	.LVL0:
+  70               	/* prologue: function */
+  71               	/* frame size = 0 */
+  72 0030 982F      		mov r25,r24
+  73               	.LVL1:
+  74               	.L8:
+  75               	.LM13:
+  76 0032 8091 C000 		lds r24,192
+  77 0036 85FF      		sbrs r24,5
+  78 0038 00C0      		rjmp .L8
+  79               	.LM14:
+  80 003a 9093 C600 		sts 198,r25
+  81               	/* epilogue start */
+  82               	.LM15:
+  83 003e 0895      		ret
+  84               	.LFE4:
+  86               	.global	printString
+  88               	printString:
+  89               	.LFB5:
+  90               	.LM16:
+  91               	.LVL2:
+  92               	/* prologue: function */
+  93               	/* frame size = 0 */
+  94 0040 AC01      		movw r20,r24
+  95               	.LM17:
+  96 0042 20E0      		ldi r18,lo8(0)
+  97               	.LVL3:
+  98 0044 00C0      		rjmp .L12
+  99               	.LVL4:
+ 100               	.L15:
+ 101               	.LBB8:
+ 102               	.LBB9:
+ 103               	.LM18:
+ 104 0046 8091 C000 		lds r24,192
+ 105 004a 85FF      		sbrs r24,5
+ 106 004c 00C0      		rjmp .L15
+ 107               	.LM19:
+ 108 004e E093 C600 		sts 198,r30
+ 109               	.LBE9:
+ 110               	.LBE8:
+ 111               	.LM20:
+ 112 0052 2F5F      		subi r18,lo8(-(1))
+ 113               	.LVL5:
+ 114               	.L12:
+ 115               	.LM21:
+ 116 0054 FA01      		movw r30,r20
+ 117 0056 E20F      		add r30,r18
+ 118 0058 F11D      		adc r31,__zero_reg__
+ 119 005a E081      		ld r30,Z
+ 120 005c EE23      		tst r30
+ 121 005e 01F4      		brne .L15
+ 122               	/* epilogue start */
+ 123               	.LM22:
+ 124 0060 0895      		ret
+ 125               	.LFE5:
+ 127               	.global	printByte
+ 129               	printByte:
+ 130               	.LFB6:
+ 131               	.LM23:
+ 132               	.LVL6:
+ 133               	/* prologue: function */
+ 134               	/* frame size = 0 */
+ 135 0062 282F      		mov r18,r24
+ 136               	.LVL7:
+ 137               	.L18:
+ 138               	.LM24:
+ 139 0064 8091 C000 		lds r24,192
+ 140 0068 85FF      		sbrs r24,5
+ 141 006a 00C0      		rjmp .L18
+ 142               	.L24:
+ 143               	.LBB10:
+ 144               	.LBB11:
+ 145               	.LM25:
+ 146 006c 8091 C000 		lds r24,192
+ 147 0070 85FF      		sbrs r24,5
+ 148 0072 00C0      		rjmp .L24
+ 149               	.LBE11:
+ 150               	.LBE10:
+ 151               	.LM26:
+ 152 0074 822F      		mov r24,r18
+ 153 0076 6AE0      		ldi r22,lo8(10)
+ 154 0078 0E94 0000 		call __udivmodqi4
+ 155 007c 0E94 0000 		call __udivmodqi4
+ 156 0080 905D      		subi r25,lo8(-(48))
+ 157               	.LBB13:
+ 158               	.LBB12:
+ 159               	.LM27:
+ 160 0082 9093 C600 		sts 198,r25
+ 161               	.L20:
+ 162               	.LBE12:
+ 163               	.LBE13:
+ 164               	.LM28:
+ 165 0086 8091 C000 		lds r24,192
+ 166 008a 85FF      		sbrs r24,5
+ 167 008c 00C0      		rjmp .L20
+ 168               	.L23:
+ 169               	.LBB14:
+ 170               	.LBB15:
+ 171               	.LM29:
+ 172 008e 8091 C000 		lds r24,192
+ 173 0092 85FF      		sbrs r24,5
+ 174 0094 00C0      		rjmp .L23
+ 175               	.LBE15:
+ 176               	.LBE14:
+ 177               	.LM30:
+ 178 0096 822F      		mov r24,r18
+ 179 0098 6AE0      		ldi r22,lo8(10)
+ 180 009a 0E94 0000 		call __udivmodqi4
+ 181 009e 905D      		subi r25,lo8(-(48))
+ 182               	.LBB17:
+ 183               	.LBB16:
+ 184               	.LM31:
+ 185 00a0 9093 C600 		sts 198,r25
+ 186               	/* epilogue start */
+ 187               	.LBE16:
+ 188               	.LBE17:
+ 189               	.LM32:
+ 190 00a4 0895      		ret
+ 191               	.LFE6:
+ 249               	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 USART.c
+C:\Users\Jadonis\AppData\Local\Temp/cclO1mYM.s:2      *ABS*:0000003f __SREG__
+C:\Users\Jadonis\AppData\Local\Temp/cclO1mYM.s:3      *ABS*:0000003e __SP_H__
+C:\Users\Jadonis\AppData\Local\Temp/cclO1mYM.s:4      *ABS*:0000003d __SP_L__
+C:\Users\Jadonis\AppData\Local\Temp/cclO1mYM.s:5      *ABS*:00000034 __CCP__
+C:\Users\Jadonis\AppData\Local\Temp/cclO1mYM.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\Jadonis\AppData\Local\Temp/cclO1mYM.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\Jadonis\AppData\Local\Temp/cclO1mYM.s:18     .text:00000000 initUSART
+C:\Users\Jadonis\AppData\Local\Temp/cclO1mYM.s:47     .text:00000022 receiveByte
+C:\Users\Jadonis\AppData\Local\Temp/cclO1mYM.s:66     .text:00000030 transmitByte
+C:\Users\Jadonis\AppData\Local\Temp/cclO1mYM.s:88     .text:00000040 printString
+C:\Users\Jadonis\AppData\Local\Temp/cclO1mYM.s:129    .text:00000062 printByte
+
+UNDEFINED SYMBOLS
+__udivmodqi4
