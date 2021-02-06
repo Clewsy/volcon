@@ -37,7 +37,7 @@
   this software.
 */
 
-#include "Keyboard.h"
+#include "volume_control.h"
 
 // Indicates what report mode the host has requested, true for normal HID reporting mode, false for special boot
 // protocol reporting mode.
@@ -83,9 +83,7 @@ void SetupHIDHardware(void)
 	clock_prescale_set(clock_div_1);
 
 	// Hardware Initialization
-//	LEDs_Init();
 	USB_Init();
-//	Buttons_Init();
 }
 
 // Event handler for the USB_Connect event. This indicates that the device is enumerating via the status LEDs and starts
@@ -133,28 +131,15 @@ void EVENT_USB_Device_ControlRequest(void)
 		case HID_REQ_GetReport:
 			if (USB_ControlRequest.bmRequestType == (REQDIR_DEVICETOHOST | REQTYPE_CLASS | REQREC_INTERFACE))
 			{
-				// Determine if it is the keyboard or media controller data that is being requested.
-//				if (!(USB_ControlRequest.wIndex))
-//				{
-//
-//					// Create the next keyboard report for transmission to the host.
-//					USB_KeyboardReport_Data_t KeyboardReportData;
-//					CreateKeyboardReport(&KeyboardReportData);
-//					// Write the report data to the control endpoint.
-//					Endpoint_Write_Control_Stream_LE(&KeyboardReportData, sizeof(KeyboardReportData));
-//				}
-//				else
-//				{
-					// Create the next media controller report for transmission to the host.
-					USB_MediaReport_Data_t MediaControllerReportData;
-					CreateMediaControllerReport(&MediaControllerReportData, 0);
-					// Write the report data to the control endpoint.
-					Endpoint_Write_Control_Stream_LE(&MediaControllerReportData, sizeof(MediaControllerReportData));
-//				}
+				// Create the next media controller report for transmission to the host.
+				USB_MediaReport_Data_t MediaControllerReportData;
+				create_volume_report(&MediaControllerReportData, 0);
+				// Write the report data to the control endpoint.
+				Endpoint_Write_Control_Stream_LE(&MediaControllerReportData, sizeof(MediaControllerReportData));
+
 				Endpoint_ClearOUT();
 				
 				Endpoint_ClearSETUP();
-
 			}
 			break;
 
@@ -170,14 +155,8 @@ void EVENT_USB_Device_ControlRequest(void)
 					  return;
 				}
 
-				// Read in the LED report from the host.
-//				uint8_t LEDStatus = Endpoint_Read_8();
-
 				Endpoint_ClearOUT();
 				Endpoint_ClearStatusStage();
-
-				// Process the incoming LED report.
-//				ProcessLEDReport(LEDStatus);
 			}
 			break;
 
@@ -238,148 +217,31 @@ void EVENT_USB_Device_StartOfFrame(void)
 	if (IdleMSRemaining) IdleMSRemaining--;
 }
 
-// Fills the given HID report data structure with the next keyboard HID input report to send to the host.
-// ReportData: Pointer to a HID report data structure to be filled.
-// clewsy: create HID report function significantly changed.  Report data derived from keyscan report created by the
-// create_keyscan_report() function in keyscan.c.
-//void CreateKeyboardReport(USB_KeyboardReport_Data_t* const ReportData)
-//{
-//	// Clear the report contents.
-//	memset(ReportData, 0, sizeof(USB_KeyboardReport_Data_t));
-//
-//	// Update the modifier byte from the last keyscan report.
-//	ReportData->Modifier = keyscan_report.modifier;
-//
-//	// Update the keys from the last keyscan report.
-//	for(uint8_t i = 0; keyscan_report.keys[i] != 0x00; i++)  ReportData->KeyCode[i] = keyscan_report.keys[i];
-//}
-
 // Fills the given HID report data structure with the next media controller HID input report to send to the host.
 // MediaReportData:  Pointer to a HID report data structure to be filled.
 // clewsy: created this function from scratch, same concept as keyboard version.
-void CreateMediaControllerReport(USB_MediaReport_Data_t* const MediaReportData, int8_t delta)
+void create_volume_report(USB_MediaReport_Data_t* const MediaReportData, int8_t delta)
 {
 	// Clear the report contents.
 	memset(MediaReportData, 0, sizeof(USB_MediaReport_Data_t));
 
 	// Update the Media Control report flags from the latest keyscan report.
-//	MediaReportData->Play		= (keyscan_report.media_keys & (1 << MK_PLAY)		? true : false);
-//	MediaReportData->Pause		= (keyscan_report.media_keys & (1 << MK_PAUSE)		? true : false);
-//	MediaReportData->FForward	= (keyscan_report.media_keys & (1 << MK_FF)		? true : false);
-//	MediaReportData->Rewind		= (keyscan_report.media_keys & (1 << MK_RW)		? true : false);
-//	MediaReportData->NextTrack	= (keyscan_report.media_keys & (1 << MK_NEXT)		? true : false);
-//	MediaReportData->PreviousTrack	= (keyscan_report.media_keys & (1 << MK_PREVIOUS)	? true : false);
-//	MediaReportData->Stop		= (keyscan_report.media_keys & (1 << MK_STOP)		? true : false);
-//	MediaReportData->PlayPause	= (keyscan_report.media_keys & (1 << MK_TOGGLE)		? true : false);
-//	MediaReportData->Mute		= (keyscan_report.media_keys & (1 << MK_MUTE)		? true : false);
-//	MediaReportData->VolumeUp	= (keyscan_report.media_keys & (1 << MK_VOL_UP)		? true : false);
-//	MediaReportData->VolumeDown	= (keyscan_report.media_keys & (1 << MK_VOL_DOWN)	? true : false);
-
-
-MediaReportData->Play		=false;
-MediaReportData->Pause		=false;
-MediaReportData->FForward	=false;
-MediaReportData->Rewind		=false;
-MediaReportData->NextTrack	=false;
-MediaReportData->PreviousTrack	=false;
-MediaReportData->Stop		=false;
-MediaReportData->PlayPause	=false;
-MediaReportData->Mute		=false;
-MediaReportData->VolumeUp	=false;
 	MediaReportData->VolumeUp	= ((delta > 0)	? true : false);
 	MediaReportData->VolumeDown	= ((delta < 0)	? true : false);
-//MediaReportData->VolumeDown=delta;
-
-
-
 }
-
-// clewsy: Similar to CreateKeyboardReport() function but creates a report for a single specific keypress.
-//void CreateMacroKeyReport(USB_KeyboardReport_Data_t* const ReportData, char key_code, bool upper_case)
-//{
-//	// Clear the report contents.
-//	memset(ReportData, 0, sizeof(USB_KeyboardReport_Data_t));
-//
-//	if(upper_case == true)	ReportData->Modifier = 0b00000010;	// Apply left shift key.
-//
-//	ReportData->KeyCode[0] = key_code;
-//}
-
-// Processes a received LED report, and updates the board LEDs states to match.
-// LEDReport: LED status report from the host.
-// clewsy: Commented for now, may remove completely depending on how I decide to control LEDs on the custom board.
-//void ProcessLEDReport(const uint8_t LEDReport)
-//{
-////	uint8_t LEDMask = LEDS_LED2;
-////
-////	if (LEDReport & HID_KEYBOARD_LED_NUMLOCK)
-////	  LEDMask |= LEDS_LED1;
-////
-////	if (LEDReport & HID_KEYBOARD_LED_CAPSLOCK)
-////	  LEDMask |= LEDS_LED3;
-////
-////	if (LEDReport & HID_KEYBOARD_LED_SCROLLLOCK)
-////	  LEDMask |= LEDS_LED4;
-////
-////	// Set the status LEDs to the current Keyboard LED status.
-////	LEDs_SetAllLEDs(LEDMask);
-//}
-
-// Sends the next keyboard HID report to the host, via the keyboard data endpoint.
-//void SendNextKeyboardReport(void)
-//{
-//	static USB_KeyboardReport_Data_t PrevKeyboardReportData;
-//	USB_KeyboardReport_Data_t        KeyboardReportData;
-//	bool                             SendReport = false;
-//
-//	// Create the next keyboard report for transmission to the host.
-//	CreateKeyboardReport(&KeyboardReportData);
-//
-//	// Check if the idle period is set and has elapsed.
-//	if (IdleCount && (!(IdleMSRemaining)))
-//	{
-//		// Reset the idle time remaining counter.
-//		IdleMSRemaining = IdleCount;
-//
-//		// Idle period is set and has elapsed, must send a report to the host.
-//		SendReport = true;
-//	}
-//	else
-//	{
-//		// Check to see if the report data has changed - if so a report MUST be sent.
-//		SendReport = (memcmp(&PrevKeyboardReportData, &KeyboardReportData, sizeof(USB_KeyboardReport_Data_t)) != 0);
-//	}
-//
-//	// Select the Keyboard Report Endpoint.
-//	Endpoint_SelectEndpoint(KEYBOARD_IN_EPADDR);
-//
-//	// Check if Keyboard Endpoint Ready for Read/Write and if we should send a new report.
-//	if (Endpoint_IsReadWriteAllowed() && SendReport)
-//	{
-//		// Save the current report data for later comparison to check for changes.
-//		PrevKeyboardReportData = KeyboardReportData;
-//
-//		// Write Keyboard Report Data.
-//		Endpoint_Write_Stream_LE(&KeyboardReportData, sizeof(KeyboardReportData), NULL);
-//
-//		// Finalize the stream transfer to send the last packet.
-//		Endpoint_ClearIN();
-//	}
-//
-//	// If there were more keys (e.g. a full-size keyboard), this delay would likely not be required.
-//	_delay_ms(DEBOUNCE_MS);	//Dirty delay to prevent button bounce registering as a double-press.
-//}
 
 // Sends the next media controller HID report to the host, via the keyboard data endpoint.
 // clewsy: This function is very similar to the keyboard equivalent but was created for media controller reports.
-void SendNextMediaControllerReport(int8_t delta)
+void send_volume(int8_t delta)
 {
+if (USB_DeviceState != DEVICE_STATE_Configured) return;
+
 	static USB_MediaReport_Data_t	PrevMediaControllerReportData;
 	USB_MediaReport_Data_t		MediaControllerReportData;
 	bool				SendReport = false;
 
 	// Create the next keyboard report for transmission to the host.
-	CreateMediaControllerReport(&MediaControllerReportData, delta);
+	create_volume_report(&MediaControllerReportData, delta);
 
 	// Check if the idle period is set and has elapsed.
 	if (IdleCount && (!(IdleMSRemaining)))
@@ -411,96 +273,4 @@ void SendNextMediaControllerReport(int8_t delta)
 		// Finalize the stream transfer to send the last packet.
 		Endpoint_ClearIN();
 	}
-}
-
-// Reads the next LED status report from the host from the LED data endpoint, if one has been sent.
-//void ReceiveNextKeyboardReport(void)
-//{
-//	// Select the Keyboard LED Report Endpoint.
-//	Endpoint_SelectEndpoint(KEYBOARD_OUT_EPADDR);
-//
-//	// Check if Keyboard LED Endpoint contains a packet.
-//	if (Endpoint_IsOUTReceived())
-//	{
-//		// Check to see if the packet contains data.
-//		if (Endpoint_IsReadWriteAllowed())
-//		{
-//			// Read in the LED report from the host.
-//			uint8_t LEDReport = Endpoint_Read_8();
-//
-//			// Process the read LED report from the host.
-//			ProcessLEDReport(LEDReport);
-//		}
-//
-//		// Handshake the OUT Endpoint - clear endpoint and ready for next report.
-//		Endpoint_ClearOUT();
-//	}
-//}
-
-// clewsy: Send the multiple sequential reports that make up a define macro.
-//void SendMacroReports(const char *macro_string)
-//{
-//	static const char *last_macro_string = "";	// Remember the last run macro.
-//
-//	if(last_macro_string != macro_string)	// Only if the macro has changed - prevents re-run if key held.
-//	{
-//		uint8_t i = 0;
-//		while(pgm_read_byte(&macro_string[i]) != '\0')
-//		{
-//			type_key(pgm_read_byte(&macro_string[i++]));
-//			USB_USBTask();	// In the lufa library.
-//		}
-//		last_macro_string = macro_string;
-//	}
-//}
-
-// clewsy: effectivley send a keyboard report but for a single character. 
-//void type_key(char key)
-//{
-//	SendNextMacroKeyReport(char_to_code(key), upper_case_check(key));
-//	SendNextMacroKeyReport(0x00, false);	// Send a "no-key" after each actual char (i.e. release the key).
-//}
-
-// clewsy: Similar to teh SendNextKeyboardReport() function, but types a single key (with or without modifiers).
-// Intended to be used sequentially to "type" a string of characters - i.e. a macro.
-//void SendNextMacroKeyReport(uint8_t key_code, bool upper_case)
-//{
-//	USB_KeyboardReport_Data_t        MacroReportData;
-//
-//	// Create the next keyboard report for transmission to the host.
-//	CreateMacroKeyReport(&MacroReportData, key_code, upper_case);
-//
-//	// Select the Keyboard Report Endpoint.
-//	Endpoint_SelectEndpoint(KEYBOARD_IN_EPADDR);
-//
-//	// Wait until Keyboard Endpoint Ready for Read/Write.
-//	while(!Endpoint_IsReadWriteAllowed()) {}
-//
-//	// Write Keyboard Report Data.
-//	Endpoint_Write_Stream_LE(&MacroReportData, sizeof(MacroReportData), NULL);
-//
-//	// Finalize the stream transfer to send the last packet.
-//	Endpoint_ClearIN();
-//}
-
-// Function to manage HID report generation and transmission to the host, when in report mode.
-void HID_Task(int8_t delta)
-{
-	// Device must be connected and configured for the task to run.
-	if (USB_DeviceState != DEVICE_STATE_Configured) return;
-
-	// clewsy: Check for and action any key presses designated as macros.
-//	SendMacroReports(scan_macro_keys());
-
-	// clewsy: Update the keyscan report - will be used for creating both the keyboard and media controller reports.
-//	create_keyscan_report(&keyscan_report);
-
-	// Send the next keypress report to the host.
-//	SendNextKeyboardReport();
-
-	// Process the LED report sent from the host.
-//	ReceiveNextKeyboardReport();
-
-	// clewsy: Send the next media controller keypress report to the host.
-	SendNextMediaControllerReport(delta);
 }

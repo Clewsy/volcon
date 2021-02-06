@@ -1,58 +1,55 @@
 #include "volcon.h"
 
+ISR(OPTO_A_VECT) {handle_opto();}
 
-
-
-ISR(OPTO_A_VECT)
-{
-	handle_opto();
-}
-
-ISR(OPTO_B_VECT)
-{
-	handle_opto();
-}
-
-//volatile uint8_t volUp = 0;		//volUp is a global variable - only set to 1 from within pin-change interrupt 0 subroutine (PCINT0_vect) and used in the USB mediareport.
-//volatile uint8_t volDown = 0;	//
+ISR(OPTO_B_VECT) {handle_opto();}
 
 void handle_opto(void)
-{	 
-	static uint8_t old_AB = 3;		//lookup table index
-	static int8_t encval = 0;		//encoder value  
-	static const int8_t enc_states [] PROGMEM = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};  //encoder lookup table
+{	
+	// The first 4 bits of variable a_b are used.
+	// bits 3:2 become the previous state of the encoder.  
+	// bits 1:0 become the current state of the encoder.  
+	// The bit pars are compared to determine the direction the encoder has rotated.
+	// Static to retain every time this function is called.
+	static uint8_t a_b = 0b11;
 
-int8_t delta = 0;
+	// Encoder lookup table.  Use this table to register every pulse.
+	//static const int8_t enc_table [] PROGMEM = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
+	// Encoder lookup table.  Use this table to register every second pulse.
+	static const int8_t enc_table [] PROGMEM = {0,0,0,0,1,0,0,-1,-1,0,0,1,0,0,0,0};
+	// Look-up table for registering every pulse:
+	// enc_table table element
+	// |   Previous State
+	// |   |    Current State
+	// |   |    |      Delta (-1 for couter-clock-wise, 1 for clock-wise)
+	// |   |    |      |
+	// |   BA : BA     |
+	// 00  00 : 00 ->  0
+	// 01  00 : 01 -> -1
+	// 02  00 : 10 ->  1
+	// 03  00 : 11 ->  0 (impossible)
+	// 04  01 : 00 ->  1
+	// 05  01 : 01 ->  0
+	// 06  01 : 10 ->  0 (impossible)
+	// 07  01 : 11 -> -1
+	// 08  10 : 00 -> -1
+	// 09  10 : 01 ->  0 (impossible)
+	// 10  10 : 10 ->  0
+	// 11  10 : 11 ->  1
+	// 12  11 : 00 ->  0 (impossible)
+	// 13  11 : 01 ->  1
+	// 14  11 : 10 -> -1
+	// 15  11 : 11 ->  0
 
-	old_AB <<=2;  //remember previous state
-//	old_AB |= ( (PINB >> 6) & 0x03 );
-	old_AB |= (OPTO_PINS & OPTO_PIN_MASK);
-	encval -= pgm_read_byte(&(enc_states[( old_AB & 0x0f )]));
+	// "Remember" previous state of the channels.
+	a_b <<= 2;
 
-	/* post "Navigation forward/reverse" event */
-	if( encval > 1 ) //two steps forward
-	{
-		delta = -1;
-		encval = 0;
-	}
-	else if( encval < -1 )//two steps backwards
-	{
-		delta = 1;
-		encval = 0;
-	}
+	// Read in the current state of the channels.
+	a_b |= (OPTO_PINS & OPTO_PIN_MASK);
 
-//	HID_Device_USBTask(&MediaControl_HID_Interface);
-//	USB_USBTask();
-HID_Task(delta);	// In Keyboard.c
-
-//	volUp = 0;
-//	volDown = 0;
+	// Look-up the desired voluje delta (-1, 0 ot 1) and send to the send_volume(delta) function.
+	send_volume(pgm_read_byte(&(enc_table[( a_b & 0x0f )])));	// In Keyboard.c
 }
-
-
-
-
-
 
 
 // Initialise the hardware peripherals.
@@ -71,10 +68,11 @@ void hardware_init(void)
 	// Globally enable all interrupts.
 	sei();
 
-	SetupHIDHardware();	// Defined in Keyboard.c
+	// Defined in volume_control.c
+	SetupHIDHardware();
 }
 
-// Main program entry point.
+// Main entry point.
  int main(void)
 {
 	hardware_init();
@@ -82,7 +80,7 @@ void hardware_init(void)
 
 	while(true)
 	{
-		HID_Task(0);	// In Keyboard.c
-		USB_USBTask();	// In the lufa library.
+		send_volume(0);
+		USB_USBTask();
 	}
 }

@@ -1,8 +1,6 @@
 #include <avr/io.h>
 
-#include "Keyboard.h"	// Pulls in all the lufa library defines.
-//#include "keyscan.h"	// Included in Keyboard.h
-//#include "keymap.h"	// Included in keyscan.h
+#include "volume_control.h"	// Pulls in all the lufa library defines.
 
 
 // GPIO configuration definitions.

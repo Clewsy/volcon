@@ -47,16 +47,10 @@
 	#include "Descriptors.h"
 
 	#include <LUFA/Drivers/USB/USB.h>
-	#include <LUFA/Drivers/Board/Joystick.h>
-	#include <LUFA/Drivers/Board/Buttons.h>
-	#include <LUFA/Drivers/Board/LEDs.h>
-	#include <LUFA/Platform/Platform.h>
-
-	// clewsy: keyscan.h and .c files written for specific use-case, custom board.
-//	#include "keyscan.h"
-
-	// Needed to prevent double key-presses.  Small number of keys means key-scanning happens a bit too quickly.
-//	#define DEBOUNCE_MS	2
+//	#include <LUFA/Drivers/Board/Joystick.h>
+//	#include <LUFA/Drivers/Board/Buttons.h>
+//	#include <LUFA/Drivers/Board/LEDs.h>
+//	#include <LUFA/Platform/Platform.h>
 
 	// Type Defines:
 	// clewsy: Type define for a Media Control HID report. This report contains the bits to match the usages defined
@@ -78,21 +72,11 @@
 		unsigned RESERVED       : 5;
 	} ATTR_PACKED USB_MediaReport_Data_t;
 
-	// The following struct for keyboard reports is defined in the lufa library HIDClassCommon.h file.  It's
-	// included here for easy reference.
-//	typedef struct
-//	{
-//		uint8_t Modifier; /**< Keyboard modifier byte, indicating pressed modifier keys (a combination of
-//		                   *   \c HID_KEYBOARD_MODIFER_* masks).
-//		                   */
-//		uint8_t Reserved; /**< Reserved for OEM use, always set to 0. */
-//		uint8_t KeyCode[6]; /**< Key codes of the currently pressed keys. */
-//	} ATTR_PACKED USB_KeyboardReport_Data_t;
 
 	// Function Prototypes:
 	void SetupHIDHardware(void);
 //	void HID_Task(void);
-	void HID_Task(int8_t delta);
+	void send_volume(int8_t delta);
 
 	void EVENT_USB_Device_Connect(void);
 	void EVENT_USB_Device_Disconnect(void);
@@ -100,12 +84,12 @@
 	void EVENT_USB_Device_ControlRequest(void);
 	void EVENT_USB_Device_StartOfFrame(void);
 //	void CreateKeyboardReport(USB_KeyboardReport_Data_t* const ReportData);
-	void CreateMediaControllerReport(USB_MediaReport_Data_t* const MediaReportData, int8_t delta);
+	void create_volume_report(USB_MediaReport_Data_t* const MediaReportData, int8_t delta);
 //	void CreateMacroKeyReport(USB_KeyboardReport_Data_t* const ReportData, char key_code, bool upper_case);
 //	void ProcessLEDReport(const uint8_t LEDReport);
 //	void SendNextKeyboardReport(void);
 //	void ReceiveNextKeyboardReport(void);
-	void SendNextMediaControllerReport(int8_t delta);
+//	void SendNextMediaControllerReport(int8_t delta);
 //	void SendMacroReports(const char *macro_string);
 //	void type_key(char key);
 //	void SendNextMacroKeyReport(uint8_t key_code, bool upper_case);

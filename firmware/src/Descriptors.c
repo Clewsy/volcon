@@ -116,8 +116,8 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 
 	.Endpoint0Size          = FIXED_CONTROL_ENDPOINT_SIZE,
 
-	.VendorID               = 0x00C0,
-	.ProductID              = 0xFFEE,
+	.VendorID               = 0xEEEE,
+	.ProductID              = 0xFF0C,
 	.ReleaseNumber          = VERSION_BCD(0,0,1),
 
 	.ManufacturerStrIndex   = STRING_ID_Manufacturer,
@@ -139,7 +139,6 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.Header                 = {.Size = sizeof(USB_Descriptor_Configuration_Header_t), .Type = DTYPE_Configuration},
 
 			.TotalConfigurationSize = sizeof(USB_Descriptor_Configuration_t),
-//			.TotalInterfaces        = 2,
 			.TotalInterfaces        = 1,
 
 			.ConfigurationNumber    = 1,
