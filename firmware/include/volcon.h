@@ -1,7 +1,4 @@
-#include <avr/io.h>
-
-#include "volume_control.h"	// Pulls in all the lufa library defines.
-
+#include "volume_control.h"	// USB stuff for controlling tyhe volume.
 
 // GPIO configuration definitions.
 #define OPTO_PORT	PORTD	// Hardware Port definition for setting pull-ups.
@@ -9,7 +6,7 @@
 #define OPTO_DDR	DDRD	// Hardware data direction register.
 #define OPTO_A_PIN	PD0	// GPIO pin connected to opto sensor channel A.
 #define OPTO_B_PIN	PD1	// GPIO pin connected to opto sensor channel B.
-#define OPTO_PIN_MASK	0x03	// And (&) with OPTP_PINS to read only the channel A and B pins.
+#define OPTO_PIN_MASK	0x03	// And (&) with OPTO_PINS to read only the channel A and B pins.
 
 // Interrupt configuration definitions.
 #define OPTO_EICRA	EICRA   	// External Interrupt control register A.
@@ -23,4 +20,8 @@
 #define OPTO_A_VECT	INT0_vect       // Interrupt subroutine vector fot channel A.
 #define OPTO_B_VECT	INT1_vect       // Interrupt subroutine vector fot channel B.
 
-void handle_opto(void);
+// Function declarations.
+ISR(OPTO_A_VECT);		// Interrupt vector - just directs to handle_opto() function.
+ISR(OPTO_B_VECT);		// Interrupt vector - just directs to handle_opto() function.
+void handle_opto(void);		// Triggered by a change in the optical encoder channels.  Updates volume accordingly.
+void hardware_init(void);	// Initialises avr peripherals.

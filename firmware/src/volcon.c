@@ -1,7 +1,7 @@
 #include "volcon.h"
 
+// Vectors for external interrupt pins connected to channels A and B of the optical encoder.
 ISR(OPTO_A_VECT) {handle_opto();}
-
 ISR(OPTO_B_VECT) {handle_opto();}
 
 void handle_opto(void)
@@ -9,14 +9,15 @@ void handle_opto(void)
 	// The first 4 bits of variable a_b are used.
 	// bits 3:2 become the previous state of the encoder.  
 	// bits 1:0 become the current state of the encoder.  
-	// The bit pars are compared to determine the direction the encoder has rotated.
+	// The bit pairs are compared to determine the direction the encoder has rotated.
 	// Static to retain every time this function is called.
 	static uint8_t a_b = 0b11;
 
-	// Encoder lookup table.  Use this table to register every pulse.
-	//static const int8_t enc_table [] PROGMEM = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
-	// Encoder lookup table.  Use this table to register every second pulse.
-	static const int8_t enc_table [] PROGMEM = {0,0,0,0,1,0,0,-1,-1,0,0,1,0,0,0,0};
+	// Encoder lookup table.  Three versions of the table for various levels of "sensitivity".
+	//static const int8_t enc_table [] PROGMEM = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};	// Register every pulse.
+	static const int8_t enc_table [] PROGMEM = {0,0,0,0,1,0,0,-1,-1,0,0,1,0,0,0,0};		// Register every second pulse.
+	//static const int8_t enc_table [] PROGMEM = {0,0,0,0,1,0,0,-1,0,0,0,0,0,0,0,0};	// Register every fourth pulse.
+
 	// Look-up table for registering every pulse:
 	// enc_table table element
 	// |   Previous State
@@ -48,9 +49,8 @@ void handle_opto(void)
 	a_b |= (OPTO_PINS & OPTO_PIN_MASK);
 
 	// Look-up the desired voluje delta (-1, 0 ot 1) and send to the send_volume(delta) function.
-	send_volume(pgm_read_byte(&(enc_table[( a_b & 0x0f )])));	// In Keyboard.c
+	send_volume(pgm_read_byte(&(enc_table[( a_b & 0x0f )])));
 }
-
 
 // Initialise the hardware peripherals.
 void hardware_init(void)
@@ -65,18 +65,17 @@ void hardware_init(void)
 	// Enable external interrupts on the pins connected to opto channels A & B.
 	OPTO_EIMSK |= ((1 << OPTO_INTA) | (1 << OPTO_INTB));
 
-	// Globally enable all interrupts.
-	sei();
-
 	// Defined in volume_control.c
 	SetupHIDHardware();
+
+	// Globally enable all interrupts.
+	GlobalInterruptEnable();
 }
 
 // Main entry point.
  int main(void)
 {
 	hardware_init();
-	GlobalInterruptEnable();
 
 	while(true)
 	{
