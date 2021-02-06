@@ -1,1 +1,12 @@
-hardware/export
+firmware/*.bin
+firmware/*.eep
+firmware/*.elf
+firmware/*.hex
+firmware/*.lss
+firmware/*.map
+firmware/*.sym
+firmware/obj
+firmware/lib/LUFA
+firmware/.vscode
+hardware/gerber
+.vscode
