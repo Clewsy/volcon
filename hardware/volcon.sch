@@ -752,11 +752,11 @@ NoConn ~ 3900 5700
 NoConn ~ 3900 5800
 NoConn ~ 2700 3500
 Text Notes 7400 7500 0    79   ~ 0
-VOLCON
+volcon
 Text Notes 10600 7650 0    79   ~ 0
 2
 Text Notes 8150 7650 0    79   ~ 0
-2021-01-26
+2021-02-07
 Wire Notes Line
 	4950 4500 4950 6650
 Wire Notes Line
@@ -797,4 +797,6 @@ Wire Notes Line
 	9950 4100 9950 5650
 Wire Notes Line
 	9950 5650 8650 5650
+Text Notes 7000 7100 0    50   ~ 0
+Changes from revision 1:\n- KiCAD instead of Eagle.\n- ATmega32u4 instead of AT90usb162.\n- Removed serial connector.\n- Removed reset push-button.\n- SMD instead of through-hole components.\n- USB-C connector instead of USB-B.
 $EndSCHEMATC
