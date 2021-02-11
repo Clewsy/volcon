@@ -41,6 +41,7 @@ After even more time, I decided to do an overhaul. Revision 2 would use the same
 * A couple of LEDs on the bottom of the PCB purely to visualise the gray code (Rev 1 had LEDs but they only barely shone through etched sections of the PCB).
 * Generally improved and cleaner code (still using the LUFA library).
 
+![The completed volcon.][link_image_volcon]
 
 [link_image_volcon]:volcon.jpg
 
