@@ -158,15 +158,17 @@ void create_volume_report(USB_VolReport_Data_t* const VolReportData, int8_t delt
 	memset(VolReportData, 0, sizeof(USB_VolReport_Data_t));
 
 	// Update the Volume Control report flags from the latest keyscan report.
-	VolReportData->VolumeUp		= ((delta > 0)	? true : false);
-	VolReportData->VolumeDown	= ((delta < 0)	? true : false);
+	VolReportData->VolumeUp		= ((delta > 0) ? true : false);
+	VolReportData->VolumeDown	= ((delta < 0) ? true : false);
 }
 
 // Sends the next volume controller HID report to the host, via the volume data endpoint.
 void send_volume(int8_t delta)
 {
-if (USB_DeviceState != DEVICE_STATE_Configured) return;
+	// Exit this function if the usb device state is not yet configured.
+	if (USB_DeviceState != DEVICE_STATE_Configured) return;
 
+	// Save the last report for comparison, create the new report.
 	static USB_VolReport_Data_t	PrevVolControllerReportData;
 	USB_VolReport_Data_t		VolControllerReportData;
 	bool				SendReport = false;

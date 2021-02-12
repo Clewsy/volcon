@@ -11,7 +11,7 @@ void handle_opto(void)
 	// bits 1:0 become the current state of the encoder.  
 	// The bit pairs are compared to determine the direction the encoder has rotated.
 	// Static to retain every time this function is called.
-	static uint8_t a_b = 0b11;
+	static uint8_t a_b = 0b0011;
 
 	// Encoder lookup table.  Three versions of the table for various levels of "sensitivity".
 	//static const int8_t enc_table [] PROGMEM = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};	// Register every pulse.
@@ -20,27 +20,27 @@ void handle_opto(void)
 
 	// Look-up table for registering every pulse:
 	// enc_table table element
-	// |   Previous State
-	// |   |    Current State
-	// |   |    |      Delta (-1 for couter-clock-wise, 1 for clock-wise)
-	// |   |    |      |
-	// |   BA : BA     |
-	// 00  00 : 00 ->  0
-	// 01  00 : 01 -> -1
-	// 02  00 : 10 ->  1
-	// 03  00 : 11 ->  0 (impossible)
-	// 04  01 : 00 ->  1
-	// 05  01 : 01 ->  0
-	// 06  01 : 10 ->  0 (impossible)
-	// 07  01 : 11 -> -1
-	// 08  10 : 00 -> -1
-	// 09  10 : 01 ->  0 (impossible)
-	// 10  10 : 10 ->  0
-	// 11  10 : 11 ->  1
-	// 12  11 : 00 ->  0 (impossible)
-	// 13  11 : 01 ->  1
-	// 14  11 : 10 -> -1
-	// 15  11 : 11 ->  0
+	// |    Previous State
+	// |    |    Current State
+	// |    |    |      Element value (delta) (-1 for couter-clock-wise, 1 for clock-wise)
+	// |    |    |      |
+	// |    BA : BA     |
+	// 00 = 00 : 00 ->  0
+	// 01 = 00 : 01 -> -1
+	// 02 = 00 : 10 ->  1
+	// 03 = 00 : 11 ->  0 (impossible)
+	// 04 = 01 : 00 ->  1
+	// 05 = 01 : 01 ->  0
+	// 06 = 01 : 10 ->  0 (impossible)
+	// 07 = 01 : 11 -> -1
+	// 08 = 10 : 00 -> -1
+	// 09 = 10 : 01 ->  0 (impossible)
+	// 10 = 10 : 10 ->  0
+	// 11 = 10 : 11 ->  1
+	// 12 = 11 : 00 ->  0 (impossible)
+	// 13 = 11 : 01 ->  1
+	// 14 = 11 : 10 -> -1
+	// 15 = 11 : 11 ->  0
 
 	// "Remember" previous state of the channels.
 	a_b <<= 2;
@@ -48,14 +48,14 @@ void handle_opto(void)
 	// Read in the current state of the channels.
 	a_b |= (OPTO_PINS & OPTO_PIN_MASK);
 
-	// Look-up the desired voluje delta (-1, 0 ot 1) and send to the send_volume(delta) function.
-	send_volume(pgm_read_byte(&(enc_table[( a_b & 0x0f )])));
+	// Look-up the desired volume delta (-1, 0 or 1) and send to the send_volume(delta) function.
+	send_volume(pgm_read_byte(&enc_table[a_b & 0x0f]));
 }
 
 // Initialise the hardware peripherals.
 void hardware_init(void)
 {
-	// Set pins connected to opto sensor outputs as inputs, enable pull-ups.
+	// Set pins connected to encoder optical sensor outputs as inputs, enable pull-ups.
 	OPTO_DDR &= ~((1 << OPTO_A_PIN) | (1 << OPTO_B_PIN));
 	OPTO_PORT |= ((1 << OPTO_A_PIN) | (1 << OPTO_B_PIN));
 
